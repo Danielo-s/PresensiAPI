@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/presensi")
@@ -15,6 +16,9 @@ public class PresensiController {
 
     @Autowired
     private PresensiRepository repository;
+
+    @Autowired
+    private GeoService geoService;
 
     // GET dengan Pagination (untuk mobile scrolling)
     @GetMapping("/history/{nim}")
@@ -46,5 +50,15 @@ public class PresensiController {
                     return ResponseEntity.ok(repository.save(p));
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Tambahkan mapping berikut
+    @PostMapping("/locate")
+    public String checkLocation(@RequestBody Map<String, Object> request) {
+        double lat = Double.parseDouble(request.get("lat").toString());
+        double lng = Double.parseDouble(request.get("lng").toString());
+
+        boolean inside = geoService.isInside(lat, lng);
+        return inside ? "IN AREA" : "OUT AREA";
     }
 }
